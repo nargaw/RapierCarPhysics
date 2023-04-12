@@ -1,13 +1,41 @@
 import { Perf } from 'r3f-perf'
 import { RigidBody, useFixedJoint, useRevoluteJoint, CylinderCollider, RapierRigidBody } from '@react-three/rapier'
-import { KeyboardControls } from '@react-three/drei'
+import { KeyboardControls, useKeyboardControls } from '@react-three/drei'
 import React, { createRef, RefObject, useEffect, useMemo, useRef} from 'react'
-import { useThree } from '@react-three/fiber'
+import { useThree, useFrame } from '@react-three/fiber'
 import { Vector3 } from 'three'
 import { create } from 'zustand'
 
 export default function Test()
 {
+
+    // controls
+    const CONTROLS = {
+        forward: 'forward',
+        back: 'back',
+        left: 'left',
+        right: 'right',
+        brake: 'brake',
+    }
+    
+    const CONTROLS_MAP = [
+        { name: CONTROLS.forward, keys: ['ArrowUp', 'w', 'W'] },
+        { name: CONTROLS.back, keys: ['ArrowDown', 's', 'S'] },
+        { name: CONTROLS.left, keys: ['ArrowLeft', 'a', 'A'] },
+        { name: CONTROLS.right, keys: ['ArrowRight', 'd', 'D'] },
+        { name: CONTROLS.brake, keys: ['Space'] },
+    ]
+
+    // constants
+    const RAPIER_UPDATE_PRIORITY = -50
+    const AFTER_RAPIER_UPDATE = RAPIER_UPDATE_PRIORITY - 1
+
+    const AXLE_TO_CHASSIS_JOINT_STIFFNESS = 150000
+    const AXLE_TO_CHASSIS_JOINT_DAMPING = 20
+
+    const DRIVEN_WHEEL_FORCE = 600
+    const DRIVEN_WHEEL_DAMPING = 5
+
     const FixedJoint = ({
         body,
         wheel,
@@ -40,6 +68,26 @@ export default function Test()
             rotationAxis
         ])
 
+        const forwardPressed = useKeyboardControls((state) => state.forward)
+        const backwardPressed = useKeyboardControls((state) => state.back)
+
+        useEffect(() => {
+            if(!isDriven) return
+
+            let forward = 0
+            if(forwardPressed) forward += 1
+            if(backwardPressed) forward -= 1
+
+            forward *= DRIVEN_WHEEL_FORCE
+
+            if(forward != 0)
+            {
+                wheel.curren?.wakeUp()
+            }
+
+            joint.current?.configureMotorVelocity(forward, DRIVEN_WHEEL_DAMPING)
+        }, [forwardPressed, backwardPressed])
+
         return null
     }
 
@@ -55,6 +103,18 @@ export default function Test()
             wheelAnchor,
             rotationAxis
         ])
+
+        const left = useKeyboardControls((state) => state.left)
+        const right = useKeyboardControls((state) => state.right)
+        const targetPos = left ? 0.2 : right ? -0.2 : 0
+
+        useEffect(() => {
+            joint.current?.configureMotorPosition(
+                targetPos,
+                AXLE_TO_CHASSIS_JOINT_STIFFNESS,
+                AXLE_TO_CHASSIS_JOINT_DAMPING
+            )
+        }, [left, right])
 
         return null
     }
@@ -118,22 +178,95 @@ export default function Test()
 
             currentCameraPosition.current.lerp(idealOffset, t)
             currentCameraLookAt.current.lerp(idealLookAt, t)
-        }, -51)
+        }, AFTER_RAPIER_UPDATE)
 
         return <>
-        
+            
+            <group>
+                {/* chassis */}
+                <RigidBody ref={chassisRef} collider='cuboid' mass={1}>
+                    <mesh>
+                        <boxGeometry args={[3.5, 0.5, 1.5]} castShadow receiveShadow />
+                        <meshStandardMaterial color='red' />
+                    </mesh>
+                </RigidBody>
+
+                {/* wheels */}
+                {wheels.map((wheel, i) => (
+                    <React.Fragment key={i}>
+                        {/* axle */}
+                        <RigidBody ref={axleRefs.current[i]} position={wheel.axlePosition} colliders='cuboid'>
+                            <mesh rotation={[Math.PI/2, 0, 0]} castShadow receiveShadow>
+                                <boxGeometry args={[0.3, 0.3, 0.3]} />
+                                <meshStandardMaterial color='green' />
+                            </mesh>
+                        </RigidBody>
+
+                        {/* wheel */}
+                        <RigidBody ref={wheelRefs.current[i]} position={wheel.wheelPosition} colliders={false}>
+                            <mesh rotation-x={-Math.PI / 2} castShadow receiveShadow>
+                                <cylinderGeometry args={[0.25, 0.25, 0.24, 32]}/>
+                                <meshStandardMaterial color='orange' />
+                            </mesh>
+                            <mesh rotation-x={-Math.PI / 2}>
+                                <cylinderGeometry args={[0.251, 0.251, 0.241, 16]}/>
+                                <meshStandardMaterial color="yellow" wireframe/>
+                            </mesh>
+                            <CylinderCollider mass={0.5} friction={1.5} args={[0.124, 0.25]} rotation={[-Math.PI/2, 0, 0]}/>
+                        </RigidBody>
+
+                        {/* connect axle to chassis */}
+                        {!wheel.isSteered ? (
+                            <FixedJoint 
+                                body={chassisRef}
+                                wheel={axleRefs.current[i]}
+                                body1Anchor={wheel.axlePosition}
+                                body1LocalFrame={[0, 0, 0, 1]}
+                                body2Anchor={[0, 0, 0]}
+                                body2LocalFrame={[0, 0, 0, 1]}
+                            />
+                        ) : (
+                            <SteeredJoint 
+                                body={chassisRef}
+                                wheel={axleRefs.current[i]}
+                                bodyAnchor={wheel.axlePosition}
+                                wheelAnchor={[0, 0, 0]}
+                                rotationAxis={[0, 1, 0]}
+                            />
+                        )}
+
+                        {/* connect wheel to axle */}
+                        <AxelJoint 
+                            body={axleRefs.current[i]}
+                            wheel={wheelRefs.current[i]}
+                            bodyAnchor={[
+                                0,
+                                0,
+                                wheel.side === 'left' ? 0.35 : -0.35,
+                            ]}
+                            wheelAnchor={[0, 0, 0]}
+                            rotationAxis={[0, 0, 1]}
+                            isDriven={wheel.isDriven}
+                        />
+                    </React.Fragment>
+                ))}
+            </group>
         </>
     }
 
 
     return <>
         <Perf position={'top-left'} showGraph={'false'} minimal={'true'}/>
-        <RigidBody>
+        {/* <RigidBody>
             <mesh>
                 <meshBasicMaterial color={'white'} />
                 <boxGeometry args={[1, 1, 1]}/>
             </mesh>
-        </RigidBody>
+        </RigidBody> */}
+        <KeyboardControls map={CONTROLS_MAP}>
+            <RevoluteJointVehicle />    
+        </KeyboardControls>
+        
         <RigidBody type='fixed' position-y={-5}>
             <mesh >
                 <meshBasicMaterial color={'grey'} />
