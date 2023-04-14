@@ -69,25 +69,32 @@ export default function Test()
         ])
 
 
-        useFrame((state, delta) =>
+        // useFrame((state, delta) =>
+        // {
+        //     const { forward, backward } = getKeys()
+
+        //     if(!isDriven) return
+
+        //     let f = 0
+        //     if(forward) f += 1
+        //     if(backward) f -= 1
+
+        //     f *= DRIVEN_WHEEL_FORCE
+
+        //     if(f != 0)
+        //     {
+        //         wheel.current?.wakeUp()
+        //     }
+
+        //     joint.current?.configureMotorVelocity(f, DRIVEN_WHEEL_DAMPING)
+
+        // })
+
+        useEffect(() => 
         {
             const { forward, backward } = getKeys()
-
-            if(!isDriven) return
-
-            let f = 0
-            if(forward) f += 1
-            if(backward) f -= 1
-
-            f *= DRIVEN_WHEEL_FORCE
-
-            if(f != 0)
-            {
-                wheel.current?.wakeUp()
-            }
-
-            joint.current?.configureMotorVelocity(f, DRIVEN_WHEEL_DAMPING)
-
+            if(!isDriven) return 
+            let forth = 0
         })
         // const forwardPressed = useKeyboardControls((state) => state.forward)
         // console.log(forwardPressed)
@@ -196,11 +203,13 @@ export default function Test()
         const wheelRefs = useRef(
             wheels.map(() => createRef())
         )
-        console.log(wheelRefs.current)
+        // console.log(wheelRefs.current)
 
         const axleRefs = useRef(
             wheels.map(() => createRef())
         )
+
+        console.log(axleRefs.current)
 
         useFrame((_, delta) => {
             if (!chassisRef.current) {
@@ -249,7 +258,7 @@ export default function Test()
                         <RigidBody ref={wheelRefs.current[i]} position={wheel.wheelPosition} colliders={false}>
                             <mesh rotation-x={-Math.PI / 2} castShadow receiveShadow>
                                 <cylinderGeometry args={[0.25, 0.25, 0.24, 32]}/>
-                                <meshStandardMaterial color='orange' />
+                                <meshStandardMaterial color={['orange']} />
                             </mesh>
                             <mesh rotation-x={-Math.PI / 2}>
                                 <cylinderGeometry args={[0.251, 0.251, 0.241, 16]}/>
@@ -277,8 +286,7 @@ export default function Test()
                                 rotationAxis={[0, 1, 0]}
                             />
                         )}
-                        { console.log(wheelRefs.current[i])}
-                        {console.log(axleRefs.current[i])}
+                        
                         {/* connect wheel to axle */}
                         {/* <AxelJoint 
                             body={axleRefs.current[i]}
@@ -301,15 +309,6 @@ export default function Test()
 
     return <>
         <Perf position={'top-left'} showGraph={'false'} minimal={'true'}/>
-        {/* <RigidBody>
-            <mesh>
-                <meshBasicMaterial color={'white'} />
-                <boxGeometry args={[1, 1, 1]}/>
-            </mesh>
-        </RigidBody> */}
-        {/* <KeyboardControls map={CONTROLS_MAP}>
-               
-        </KeyboardControls> */}
         <RevoluteJointVehicle /> 
         <RigidBody type='fixed' position-y={-5}>
             <mesh >

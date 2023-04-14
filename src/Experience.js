@@ -1,6 +1,7 @@
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei'
 import { Debug, Physics } from '@react-three/rapier'
 import Test from './Test.js'
+import Lights from './Lights.js'
 
 export default function Experience()
 {
@@ -12,6 +13,7 @@ export default function Experience()
             <Debug />
             <Test />
         </Physics>
+        <Lights/>
        
     </>
 }
