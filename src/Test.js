@@ -1,30 +1,30 @@
 import { Perf } from 'r3f-perf'
 import { RigidBody, useFixedJoint, useRevoluteJoint, CylinderCollider, RapierRigidBody } from '@react-three/rapier'
-import { KeyboardControls, useKeyboardControls } from '@react-three/drei'
+import { useKeyboardControls } from '@react-three/drei'
 import React, { createRef, RefObject, useEffect, useMemo, useRef} from 'react'
 import { useThree, useFrame } from '@react-three/fiber'
-import { Vector3 } from 'three'
-import { create } from 'zustand'
+import { Quaternion, Vector3, Vector3Tuple, Vector4Tuple } from 'three'
+// import { create } from 'zustand'
 
 export default function Test()
 {
-
-    // controls
-    const CONTROLS = {
-        forward: 'forward',
-        back: 'back',
-        left: 'left',
-        right: 'right',
-        brake: 'brake',
-    }
+    const [ subscribeKeys, getKeys ] = useKeyboardControls()
+    // // controls
+    // const CONTROLS = {
+    //     forward: 'forward',
+    //     back: 'back',
+    //     left: 'left',
+    //     right: 'right',
+    //     brake: 'brake',
+    // }
     
-    const CONTROLS_MAP = [
-        { name: CONTROLS.forward, keys: ['ArrowUp', 'w', 'W'] },
-        { name: CONTROLS.back, keys: ['ArrowDown', 's', 'S'] },
-        { name: CONTROLS.left, keys: ['ArrowLeft', 'a', 'A'] },
-        { name: CONTROLS.right, keys: ['ArrowRight', 'd', 'D'] },
-        { name: CONTROLS.brake, keys: ['Space'] },
-    ]
+    // const CONTROLS_MAP = [
+    //     { name: CONTROLS.forward, keys: ['ArrowUp', 'w', 'W'] },
+    //     { name: CONTROLS.back, keys: ['ArrowDown', 's', 'S'] },
+    //     { name: CONTROLS.left, keys: ['ArrowLeft', 'a', 'A'] },
+    //     { name: CONTROLS.right, keys: ['ArrowRight', 'd', 'D'] },
+    //     { name: CONTROLS.brake, keys: ['Space'] },
+    // ]
 
     // constants
     const RAPIER_UPDATE_PRIORITY = -50
@@ -68,25 +68,47 @@ export default function Test()
             rotationAxis
         ])
 
-        const forwardPressed = useKeyboardControls((state) => state.forward)
-        const backwardPressed = useKeyboardControls((state) => state.back)
 
-        useEffect(() => {
+        useFrame((state, delta) =>
+        {
+            const { forward, backward } = getKeys()
+
             if(!isDriven) return
 
-            let forward = 0
-            if(forwardPressed) forward += 1
-            if(backwardPressed) forward -= 1
+            let f = 0
+            if(forward) f += 1
+            if(backward) f -= 1
 
-            forward *= DRIVEN_WHEEL_FORCE
+            f *= DRIVEN_WHEEL_FORCE
 
-            if(forward != 0)
+            if(f != 0)
             {
-                wheel.curren?.wakeUp()
+                wheel.current?.wakeUp()
             }
 
-            joint.current?.configureMotorVelocity(forward, DRIVEN_WHEEL_DAMPING)
-        }, [forwardPressed, backwardPressed])
+            joint.current?.configureMotorVelocity(f, DRIVEN_WHEEL_DAMPING)
+
+        })
+        // const forwardPressed = useKeyboardControls((state) => state.forward)
+        // console.log(forwardPressed)
+        // const backwardPressed = useKeyboardControls((state) => state.back)
+
+        // useEffect(() => {
+        //     if(!isDriven) return
+
+        //     let forward = 0
+        //     if(forwardPressed) forward += 1
+        //     if(backwardPressed) forward -= 1
+
+        //     forward *= DRIVEN_WHEEL_FORCE
+
+        //     if(forward != 0)
+        //     {
+        //         wheel.curren?.wakeUp()
+        //     }
+
+        //     joint.current?.configureMotorVelocity(forward, DRIVEN_WHEEL_DAMPING)
+        // }, [forwardPressed, backwardPressed])
 
         return null
     }
@@ -104,17 +126,31 @@ export default function Test()
             rotationAxis
         ])
 
-        const left = useKeyboardControls((state) => state.left)
-        const right = useKeyboardControls((state) => state.right)
-        const targetPos = left ? 0.2 : right ? -0.2 : 0
+        
 
-        useEffect(() => {
+        useFrame((state, delta) => {
+            const {leftward, rightward } = getKeys()
+
+            const targetPos = leftward ? 0.2 : rightward ? -0.2: 0
+
             joint.current?.configureMotorPosition(
                 targetPos,
                 AXLE_TO_CHASSIS_JOINT_STIFFNESS,
                 AXLE_TO_CHASSIS_JOINT_DAMPING
-            )
-        }, [left, right])
+            )  
+        })
+
+        // const left = useKeyboardControls((state) => state.left)
+        // const right = useKeyboardControls((state) => state.right)
+        // const targetPos = left ? 0.2 : right ? -0.2 : 0
+
+        // useEffect(() => {
+        //     joint.current?.configureMotorPosition(
+        //         targetPos,
+        //         AXLE_TO_CHASSIS_JOINT_STIFFNESS,
+        //         AXLE_TO_CHASSIS_JOINT_DAMPING
+        //     )
+        // }, [left, right])
 
         return null
     }
@@ -160,12 +196,16 @@ export default function Test()
         const wheelRefs = useRef(
             wheels.map(() => createRef())
         )
+        console.log(wheelRefs.current)
 
         const axleRefs = useRef(
             wheels.map(() => createRef())
         )
 
         useFrame((_, delta) => {
+            if (!chassisRef.current) {
+                return
+            }
             const t = 1. - Math.pow(0.01, delta)
             const idealOffset = new Vector3(10, 5, 0)
             idealOffset.applyQuaternion(chassisRef.current.rotation())
@@ -178,6 +218,9 @@ export default function Test()
 
             currentCameraPosition.current.lerp(idealOffset, t)
             currentCameraLookAt.current.lerp(idealLookAt, t)
+
+            camera.position.copy(currentCameraPosition.current)
+            camera.lookAt(currentCameraLookAt.current)
         }, AFTER_RAPIER_UPDATE)
 
         return <>
@@ -234,9 +277,10 @@ export default function Test()
                                 rotationAxis={[0, 1, 0]}
                             />
                         )}
-
+                        { console.log(wheelRefs.current[i])}
+                        {console.log(axleRefs.current[i])}
                         {/* connect wheel to axle */}
-                        <AxelJoint 
+                        {/* <AxelJoint 
                             body={axleRefs.current[i]}
                             wheel={wheelRefs.current[i]}
                             bodyAnchor={[
@@ -247,7 +291,7 @@ export default function Test()
                             wheelAnchor={[0, 0, 0]}
                             rotationAxis={[0, 0, 1]}
                             isDriven={wheel.isDriven}
-                        />
+                        /> */}
                     </React.Fragment>
                 ))}
             </group>
@@ -263,10 +307,10 @@ export default function Test()
                 <boxGeometry args={[1, 1, 1]}/>
             </mesh>
         </RigidBody> */}
-        <KeyboardControls map={CONTROLS_MAP}>
-            <RevoluteJointVehicle />    
-        </KeyboardControls>
-        
+        {/* <KeyboardControls map={CONTROLS_MAP}>
+               
+        </KeyboardControls> */}
+        <RevoluteJointVehicle /> 
         <RigidBody type='fixed' position-y={-5}>
             <mesh >
                 <meshBasicMaterial color={'grey'} />
