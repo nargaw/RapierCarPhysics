@@ -5,6 +5,7 @@ import React, { createRef, RefObject, useEffect, useMemo, useRef} from 'react'
 import { useThree, useFrame } from '@react-three/fiber'
 import { Quaternion, Vector3, Vector3Tuple, Vector4Tuple } from 'three'
 // import { create } from 'zustand'
+import { useRapier } from '@react-three/rapier'
 
 export default function Test()
 {
@@ -54,7 +55,7 @@ export default function Test()
         return null
     }
 
-    const AxelJoint = ({
+    const AxleJoint = ({
         body,
         wheel,
         bodyAnchor,
@@ -62,8 +63,14 @@ export default function Test()
         rotationAxis,
         isDriven
     }) => {
+        // const joint = useRevoluteJoint(body, wheel, [
+        //     bodyAnchor,
+        //     WheelAnchor,
+        //     rotationAxis
+        // ])
+
         const joint = useRevoluteJoint(body, wheel, [
-            bodyAnchor,
+            [bodyAnchor],
             WheelAnchor,
             rotationAxis
         ])
@@ -90,33 +97,6 @@ export default function Test()
 
         // })
 
-        useEffect(() => 
-        {
-            const { forward, backward } = getKeys()
-            if(!isDriven) return 
-            let forth = 0
-        })
-        // const forwardPressed = useKeyboardControls((state) => state.forward)
-        // console.log(forwardPressed)
-        // const backwardPressed = useKeyboardControls((state) => state.back)
-
-        // useEffect(() => {
-        //     if(!isDriven) return
-
-        //     let forward = 0
-        //     if(forwardPressed) forward += 1
-        //     if(backwardPressed) forward -= 1
-
-        //     forward *= DRIVEN_WHEEL_FORCE
-
-        //     if(forward != 0)
-        //     {
-        //         wheel.curren?.wakeUp()
-        //     }
-
-        //     joint.current?.configureMotorVelocity(forward, DRIVEN_WHEEL_DAMPING)
-        // }, [forwardPressed, backwardPressed])
-
         return null
     }
 
@@ -139,7 +119,7 @@ export default function Test()
             const {leftward, rightward } = getKeys()
 
             const targetPos = leftward ? 0.2 : rightward ? -0.2: 0
-
+            // console.log(targetPos)
             joint.current?.configureMotorPosition(
                 targetPos,
                 AXLE_TO_CHASSIS_JOINT_STIFFNESS,
@@ -288,26 +268,43 @@ export default function Test()
                         )}
                         
                         {/* connect wheel to axle */}
-                        {/* <AxelJoint 
+                        {/* {wheelRefs.current[i] && <AxleJoint 
                             body={axleRefs.current[i]}
                             wheel={wheelRefs.current[i]}
                             bodyAnchor={[
                                 0,
                                 0,
-                                wheel.side === 'left' ? 0.35 : -0.35,
+                                wheelRefs.current[i].side === 'left' ? 0.35 : -0.35,
                             ]}
                             wheelAnchor={[0, 0, 0]}
                             rotationAxis={[0, 0, 1]}
                             isDriven={wheel.isDriven}
-                        /> */}
+                        />} */}
+                        
                     </React.Fragment>
                 ))}
             </group>
         </>
     }
 
+    const RapierConfiguration = () => {
+        const rapier = useRapier()
+    
+        useEffect(() => {
+            const world = rapier.world.raw()
+    
+            if (!world) return
+            world.maxStabilizationIterations = 50
+            world.maxVelocityFrictionIterations = 50
+            world.maxVelocityIterations = 100
+        }, [])
+    
+        return null
+    }
+
 
     return <>
+        <RapierConfiguration />
         <Perf position={'top-left'} showGraph={'false'} minimal={'true'}/>
         <RevoluteJointVehicle /> 
         <RigidBody type='fixed' position-y={-5}>
