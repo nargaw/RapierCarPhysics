@@ -87,7 +87,7 @@ export default function Test()
                 wheel.current?.wakeUp()
             }
 
-            console.log(joint)
+            console.log(joint.current.configureMotor)
 
             joint.current?.configureMotorVelocity(f, DRIVEN_WHEEL_DAMPING)
 
@@ -296,7 +296,7 @@ export default function Test()
         <RigidBody type='fixed' position-y={-5}>
             <mesh >
                 <meshBasicMaterial color={'grey'} />
-                <boxGeometry args={[20, 0.1, 20]} />
+                <boxGeometry args={[200, 0.1, 20]} />
             </mesh>
         </RigidBody>    
     </>
