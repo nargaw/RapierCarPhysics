@@ -59,43 +59,39 @@ export default function Test()
         body,
         wheel,
         bodyAnchor,
-        WheelAnchor,
+        wheelAnchor,
         rotationAxis,
         isDriven
     }) => {
-        // const joint = useRevoluteJoint(body, wheel, [
-        //     bodyAnchor,
-        //     WheelAnchor,
-        //     rotationAxis
-        // ])
-
         const joint = useRevoluteJoint(body, wheel, [
-            [bodyAnchor],
-            WheelAnchor,
+            bodyAnchor,
+            wheelAnchor,
             rotationAxis
         ])
 
 
-        // useFrame((state, delta) =>
-        // {
-        //     const { forward, backward } = getKeys()
+        useFrame((state, delta) =>
+        {
+            const { forward, backward } = getKeys()
 
-        //     if(!isDriven) return
+            if(!isDriven) return
 
-        //     let f = 0
-        //     if(forward) f += 1
-        //     if(backward) f -= 1
+            let f = 0
+            if(forward) f += 1
+            if(backward) f -= 1
 
-        //     f *= DRIVEN_WHEEL_FORCE
+            f *= DRIVEN_WHEEL_FORCE
 
-        //     if(f != 0)
-        //     {
-        //         wheel.current?.wakeUp()
-        //     }
+            if(f != 0)
+            {
+                wheel.current?.wakeUp()
+            }
 
-        //     joint.current?.configureMotorVelocity(f, DRIVEN_WHEEL_DAMPING)
+            console.log(joint)
 
-        // })
+            joint.current?.configureMotorVelocity(f, DRIVEN_WHEEL_DAMPING)
+
+        })
 
         return null
     }
@@ -119,25 +115,13 @@ export default function Test()
             const {leftward, rightward } = getKeys()
 
             const targetPos = leftward ? 0.2 : rightward ? -0.2: 0
-            // console.log(targetPos)
             joint.current?.configureMotorPosition(
                 targetPos,
                 AXLE_TO_CHASSIS_JOINT_STIFFNESS,
                 AXLE_TO_CHASSIS_JOINT_DAMPING
-            )  
+            )
+            // console.log(leftward)
         })
-
-        // const left = useKeyboardControls((state) => state.left)
-        // const right = useKeyboardControls((state) => state.right)
-        // const targetPos = left ? 0.2 : right ? -0.2 : 0
-
-        // useEffect(() => {
-        //     joint.current?.configureMotorPosition(
-        //         targetPos,
-        //         AXLE_TO_CHASSIS_JOINT_STIFFNESS,
-        //         AXLE_TO_CHASSIS_JOINT_DAMPING
-        //     )
-        // }, [left, right])
 
         return null
     }
@@ -189,7 +173,7 @@ export default function Test()
             wheels.map(() => createRef())
         )
 
-        console.log(axleRefs.current)
+        // console.log(axleRefs.current)
 
         useFrame((_, delta) => {
             if (!chassisRef.current) {
@@ -200,10 +184,10 @@ export default function Test()
             idealOffset.applyQuaternion(chassisRef.current.rotation())
             idealOffset.add(chassisRef.current.translation())
             if(idealOffset.y < 0) {
-                idealOffset.y = 0
+                idealOffset.y = 5
             }
 
-            const idealLookAt = new Vector3(0, 1, 0)
+            const idealLookAt = new Vector3(0, 2, 0)
             idealLookAt.applyQuaternion(chassisRef.current.rotation())
             idealLookAt.add(chassisRef.current.translation())
 
@@ -270,18 +254,6 @@ export default function Test()
                         )}
                         
                         {/* connect wheel to axle */}
-                        {/* {wheelRefs.current[i] && <AxleJoint 
-                            body={axleRefs.current[i]}
-                            wheel={wheelRefs.current[i]}
-                            bodyAnchor={[
-                                0,
-                                0,
-                                wheelRefs.current[i].side === 'left' ? 0.35 : -0.35,
-                            ]}
-                            wheelAnchor={[0, 0, 0]}
-                            rotationAxis={[0, 0, 1]}
-                            isDriven={wheel.isDriven}
-                        />} */}
                         <AxleJoint
                             body={axleRefs.current[i]}
                             wheel={wheelRefs.current[i]}
