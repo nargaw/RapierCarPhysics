@@ -199,7 +199,9 @@ export default function Test()
             const idealOffset = new Vector3(10, 5, 0)
             idealOffset.applyQuaternion(chassisRef.current.rotation())
             idealOffset.add(chassisRef.current.translation())
-            if(idealOffset.y < 0) {idealOffset.y = 0}
+            if(idealOffset.y < 0) {
+                idealOffset.y = 0
+            }
 
             const idealLookAt = new Vector3(0, 1, 0)
             idealLookAt.applyQuaternion(chassisRef.current.rotation())
@@ -217,8 +219,8 @@ export default function Test()
             <group>
                 {/* chassis */}
                 <RigidBody ref={chassisRef} collider='cuboid' mass={1}>
-                    <mesh>
-                        <boxGeometry args={[3.5, 0.5, 1.5]} castShadow receiveShadow />
+                    <mesh castShadow receiveShadow>
+                        <boxGeometry args={[3.5, 0.5, 1.5]}  />
                         <meshStandardMaterial color='red' />
                     </mesh>
                 </RigidBody>
@@ -280,6 +282,18 @@ export default function Test()
                             rotationAxis={[0, 0, 1]}
                             isDriven={wheel.isDriven}
                         />} */}
+                        <AxleJoint
+                            body={axleRefs.current[i]}
+                            wheel={wheelRefs.current[i]}
+                            bodyAnchor={[
+                                0,
+                                0,
+                                wheel.side === 'left' ? 0.35 : -0.35,
+                            ]}
+                            wheelAnchor={[0, 0, 0]}
+                            rotationAxis={[0, 0, 1]}
+                            isDriven={wheel.isDriven}
+                        />
                         
                     </React.Fragment>
                 ))}
