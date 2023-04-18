@@ -1,31 +1,35 @@
 import { Perf } from 'r3f-perf'
 import { RigidBody, useFixedJoint, useRevoluteJoint, CylinderCollider, RapierRigidBody } from '@react-three/rapier'
-import { useKeyboardControls } from '@react-three/drei'
+import { useGLTF, useKeyboardControls } from '@react-three/drei'
 import React, { createRef, RefObject, useEffect, useMemo, useRef} from 'react'
 import { useThree, useFrame } from '@react-three/fiber'
 import { Quaternion, Vector3, Vector3Tuple, Vector4Tuple } from 'three'
-// import { create } from 'zustand'
+import { useControls } from 'leva'
 import { useRapier } from '@react-three/rapier'
 
 export default function Test()
 {
+
     const [ subscribeKeys, getKeys ] = useKeyboardControls()
-    // // controls
-    // const CONTROLS = {
-    //     forward: 'forward',
-    //     back: 'back',
-    //     left: 'left',
-    //     right: 'right',
-    //     brake: 'brake',
-    // }
-    
-    // const CONTROLS_MAP = [
-    //     { name: CONTROLS.forward, keys: ['ArrowUp', 'w', 'W'] },
-    //     { name: CONTROLS.back, keys: ['ArrowDown', 's', 'S'] },
-    //     { name: CONTROLS.left, keys: ['ArrowLeft', 'a', 'A'] },
-    //     { name: CONTROLS.right, keys: ['ArrowRight', 'd', 'D'] },
-    //     { name: CONTROLS.brake, keys: ['Space'] },
-    // ]
+
+    const ref = useRef()
+    const body = useRef()
+    const rightRear = useRef()
+    const leftRear = useRef()
+    const rightFront = useRef()
+    const leftFront = useRef()
+
+    const { nodes, materials } = useGLTF('Bronco.glb')
+    // console.log(nodes)
+    const { color } = useControls('Body Color', { color:'#a9a9a9' })
+    const { bullBar } = useControls('Bull Bar', {bullBar: true})
+    const { seats } = useControls('Seats', { seats:'#828282' })
+    const { wheels } = useControls('Wheels', { wheels:'#1f3152' })
+    const { radiator } = useControls('Radiator', { radiator:'#6f6f6f' })
+    const { ammo } = useControls('Ammo', { ammo:'#1f3152' })
+    // console.log(bullBar)
+    // console.log(color)
+    document.body.style.backgroundColor = color
 
     // constants
     const RAPIER_UPDATE_PRIORITY = -50
@@ -87,7 +91,7 @@ export default function Test()
                 wheel.current?.wakeUp()
             }
 
-            console.log(joint.current.configureMotor)
+            // console.log(joint.current.configureMotor)
 
             joint.current?.configureMotorVelocity(f, DRIVEN_WHEEL_DAMPING)
 
@@ -199,15 +203,143 @@ export default function Test()
         }, AFTER_RAPIER_UPDATE)
 
         return <>
-            
+            <group dispose={null} castShadow ref={ref} scale={[0.25, 0.25, 0.25]} position={[0, -0.5, 0]}>
+
+            <RigidBody ref={chassisRef} collider='cuboid' mass={1}>
+                
+            </RigidBody>
+            <group castShadow ref={body}>
+
+                
+                    
+                
+                {/* merge all ammos 0-4 */}
+                <mesh castShadow geometry={nodes.Ammo.geometry} position={nodes.Ammo.position} rotation={nodes.Ammo.rotation} material={materials.Ammo0} material-color={ammo}/>
+
+                {/* merge bodyframe doors fender */}
+                <mesh castShadow geometry={nodes.BodyFrame.geometry} position={nodes.BodyFrame.position} rotation={nodes.BodyFrame.rotation} material={materials.BodyFrame} material-color={color}/>
+
+                {/*bull bar*/}
+                {bullBar && <mesh castShadow geometry={nodes.bull_bar.geometry} position={nodes.bull_bar.position} rotation={nodes.bull_bar.rotation} material={materials['Black Metal']}/>}
+                
+
+                {/* Dash */}
+                <mesh castShadow geometry={nodes.Dash.geometry} position={nodes.Dash.position} rotation={nodes.Dash.rotation} material={materials['Black plastic']}/>
+
+                {/* logo */}
+                <mesh castShadow geometry={nodes.FastWheelLogo.geometry} position={nodes.FastWheelLogo.position} rotation={nodes.Logo.rotation} material={''}/>
+                <mesh castShadow geometry={nodes.Logo.geometry} position={nodes.Logo.position} rotation={nodes.Logo.rotation} material={materials['Logo.001']}/>
+                <mesh castShadow geometry={nodes.LogoFrame.geometry} position={nodes.LogoFrame.position} rotation={nodes.LogoFrame.rotation} material={materials['Black plastic']}/>
+
+                {/* front radiator frame */}
+                <mesh castShadow geometry={nodes.FrontRadiatorFrame.geometry} position={nodes.FrontRadiatorFrame.position} rotation={nodes.FrontRadiatorFrame.rotation} material={materials['Black Metal.001']} material-color={radiator} />
+
+                {/* front weapon */}
+                <mesh castShadow geometry={nodes.FrontWeaponAmmo.geometry} position={nodes.FrontWeaponAmmo.position} rotation={nodes.FrontWeaponAmmo.rotation} material={materials['Ammo0']}/>
+                <mesh castShadow geometry={nodes.FrontWeaponAmmoShell.geometry} position={nodes.FrontWeaponAmmoShell.position} rotation={nodes.FrontWeaponAmmoShell.rotation} material={materials['Black plastic']}/>
+                <mesh castShadow geometry={nodes.FrontWeaponCaseBody.geometry} position={nodes.FrontWeaponCaseBody.position} rotation={nodes.FrontWeaponCaseBody.rotation} material={materials['Black Metal']}/>
+
+                {/* headlight */}
+                <mesh castShadow geometry={nodes.HeadLightCover.geometry} position={nodes.HeadLightCover.position} rotation={nodes.HeadLightCover.rotation} material={materials['Black Metal']}/>
+                <mesh castShadow geometry={nodes.HeadLightRim.geometry} position={nodes.HeadLightRim.position} rotation={nodes.HeadLightRim.rotation} material={materials['Black plastic']}/>
+                <mesh castShadow geometry={nodes.HeadLightRoundRim.geometry} position={nodes.HeadLightRoundRim.position} rotation={nodes.HeadLightRoundRim.rotation} material={materials['Black plastic']}/>
+
+                {/* interior */}
+                <mesh castShadow geometry={nodes.Interior.geometry} position={nodes.Interior.position} rotation={nodes.Interior.rotation} material={materials['Black plastic']}/>
+
+                {/* Light */}
+                <mesh castShadow geometry={nodes.Light.geometry} position={nodes.Light.position} rotation={nodes.Light.rotation} material={materials.Light}/>
+                <mesh castShadow geometry={nodes.LightHead.geometry} position={nodes.LightHead.position} rotation={nodes.LightHead.rotation} material={materials.LightHead}/>
+
+                {/* metal cab frame */}
+                <mesh castShadow geometry={nodes.MetalCabFrame.geometry} position={nodes.MetalCabFrame.position} rotation={nodes.MetalCabFrame.rotation} material={materials['Black Metal']}/>
+
+                {/* radiator */}
+                <mesh castShadow geometry={nodes.Radiator.geometry} position={nodes.Radiator.position} rotation={nodes.Radiator.rotation} material={materials['Black Metal']} />
+
+                {/* seats */}
+                <mesh castShadow geometry={nodes.Seats.geometry} position={nodes.Seats.position} rotation={nodes.Seats.rotation} material={materials['Rubber.002']} material-color={seats}/>
+
+                {/* steering wheel */}
+                <mesh castShadow geometry={nodes.SteeringWheelBase.geometry} position={nodes.SteeringWheelBase.position} rotation={nodes.SteeringWheelBase.rotation} material={materials['Black Metal']}/>
+                <mesh castShadow geometry={nodes.Steering_Wheel_1.geometry} position={nodes.Steering_Wheel.position} rotation={nodes.Steering_Wheel.rotation} material={materials['Rubber']}/>
+                <mesh castShadow geometry={nodes.Steering_Wheel_2.geometry} position={nodes.Steering_Wheel.position} rotation={nodes.Steering_Wheel.rotation} material={materials['Rubber']}/>
+
+                {/* Top Light */}
+                <mesh castShadow geometry={nodes.TopLightBase.geometry} position={nodes.TopLightBase.position} rotation={nodes.TopLightBase.rotation} material={materials['Black Metal']}/>
+                <mesh castShadow geometry={nodes.TopLightFrame.geometry} position={nodes.TopLightFrame.position} rotation={nodes.TopLightFrame.rotation} material={materials['Black Metal']}/>
+                <mesh castShadow geometry={nodes.TopLights.geometry} position={nodes.TopLights.position} rotation={nodes.TopLights.rotation} material={materials['Black Metal']}/>
+
+                {/* weapons */}
+                <mesh castShadow geometry={nodes.WeaponChargeLabel.geometry} position={nodes.WeaponChargeLabel.position} rotation={nodes.WeaponChargeLabel.rotation} material={materials['WeaponChargeLabel']}/>
+                <mesh castShadow geometry={nodes.WeaponCoverMesh_1.geometry} position={nodes.WeaponCoverMesh.position} rotation={nodes.WeaponCoverMesh.rotation} material={materials['Black Metal']}/>
+                <mesh castShadow geometry={nodes.WeaponCoverMesh_2.geometry} position={nodes.WeaponCoverMesh.position} rotation={nodes.WeaponCoverMesh.rotation} material={materials['Black Metal']}/>
+                <mesh castShadow geometry={nodes.WeaponGlassCase.geometry} position={nodes.WeaponGlassCase.position} rotation={nodes.WeaponGlassCase.rotation}> 
+                    {/* {config.fakeTransmissionMaterial ? <meshStandardMaterial color={'#ffffff'} opacity={0.35} metalness={1.} roughness={0.2} transparent={'true'}/>: <MeshTransmissionMaterial background={new THREE.Color(color)} {...config} />}  */}
+                    <meshStandardMaterial color={'#ffffff'} opacity={0.35} metalness={1.} roughness={0.2} transparent={'true'}/>
+                </mesh>
+
+                {/* windshield */}
+                <mesh castShadow geometry={nodes.Windshield.geometry} position={nodes.Windshield.position} rotation={nodes.Windshield.rotation}>
+                <meshStandardMaterial color={'#ffffff'} opacity={0.35} metalness={1.} roughness={0.2} transparent={'true'}/>   
+                {/* {config.fakeTransmissionMaterial ? <meshStandardMaterial color={'#ffffff'} opacity={0.35} metalness={1.} roughness={0.} transparent={'true'}/> : <MeshTransmissionMaterial background={new THREE.Color(color)} {...config} />} */}
+                </mesh>
+            </group>
+
+            <group castShadow ref={leftFront} position={nodes.FrontLeft.position} >
+                {/* {[...Array(nodes.FrontLeft.children.length)].map((value, index) =>
+                    <mesh castShadow key={index}  geometry={nodes.FrontLeft.children[index].geometry} material={nodes.FrontLeft.children[index].material} rotation={nodes.FrontLeft.children[index].rotation}/>
+                )} */}
+                <mesh castShadow geometry={nodes['FrontLeft-Wheels'].geometry} position={nodes['FrontLeft-Wheels'].position} rotation={nodes['FrontLeft-Wheels'].rotation} material={materials['Rubber']}/>
+
+                <mesh castShadow geometry={nodes['FrontLeft-Wheels_White'].geometry} position={nodes['FrontLeft-Wheels_White'].position} rotation={nodes['FrontLeft-Wheels_White'].rotation} material={materials['Black Metal.002']} material-color={wheels}/>
+
+                <mesh castShadow geometry={nodes['FrontLeft-wheel_text'].geometry} position={nodes['FrontLeft-wheel_text'].position} rotation={nodes['FrontLeft-wheel_text'].rotation} material={materials['Material.005']}/>
+                
+            </group>
+                    
+            <group castShadow ref={rightFront} position={nodes.FrontRight.position}>
+                {/* {[...Array(nodes.FrontLeft.children.length)].map((value, index) =>
+                    <mesh castShadow key={index}  geometry={nodes.FrontRight.children[index].geometry}  material={nodes.FrontRight.children[index].material} rotation={nodes.FrontRight.children[index].rotation}/>
+                )} */}
+                <mesh castShadow geometry={nodes['FrontRIght-Wheels'].geometry} position={nodes['FrontRIght-Wheels'].position} rotation={nodes['FrontRIght-Wheels'].rotation} material={materials['Rubber']}/>
+
+                <mesh castShadow geometry={nodes['FrontRIght-Wheels_White'].geometry} position={nodes['FrontRIght-Wheels_White'].position} rotation={nodes['FrontRIght-Wheels_White'].rotation} material={materials['Black Metal.002']} material-color={wheels}/>
+
+                <mesh castShadow geometry={nodes['FrontRIght-wheel_text'].geometry} position={nodes['FrontRIght-wheel_text'].position} rotation={nodes['FrontRIght-wheel_text'].rotation} material={materials['Material.005']}/>
+            </group>
+
+            <group castShadow ref={leftRear} position={nodes.RearLeft.position} >
+                {/* {[...Array(nodes.FrontLeft.children.length)].map((value, index) =>
+                    <mesh castShadow key={index}  geometry={nodes.RearLeft.children[index].geometry}  material={nodes.RearLeft.children[index].material} rotation={nodes.RearLeft.children[index].rotation}/>
+                )} */}
+                <mesh castShadow geometry={nodes['RearLeft-Wheels'].geometry} position={nodes['RearLeft-Wheels'].position} rotation={nodes['RearLeft-Wheels'].rotation} material={materials['Rubber']}/>
+
+                <mesh castShadow geometry={nodes['RearLeft-Wheels_White'].geometry} position={nodes['RearLeft-Wheels_White'].position} rotation={nodes['RearLeft-Wheels_White'].rotation} material={materials['Black Metal.002']} material-color={wheels}/>
+
+                <mesh castShadow geometry={nodes['RearLeft-wheel_text'].geometry} position={nodes['RearLeft-wheel_text'].position} rotation={nodes['RearLeft-wheel_text'].rotation} material={materials['Material.005']}/>
+
+            </group>
+
+            <group castShadow ref={rightRear} position={nodes.RearRight.position} >
+                {/* {[...Array(nodes.FrontLeft.children.length)].map((value, index) =>
+                    <mesh castShadow key={index}  geometry={nodes.RearRight.children[index].geometry} material={nodes.RearRight.children[index].material} rotation={nodes.RearRight.children[index].rotation}/>
+                )} */}
+                <mesh castShadow geometry={nodes['RearRight-Wheels'].geometry} position={nodes['RearRight-Wheels'].position} rotation={nodes['RearRight-Wheels'].rotation} material={materials['Rubber']}/>
+
+                <mesh castShadow geometry={nodes['RearRight-Wheels_White'].geometry} position={nodes['RearRight-Wheels_White'].position} rotation={nodes['RearRight-Wheels_White'].rotation} material={materials['Black Metal.002']}/>
+
+                <mesh castShadow geometry={nodes['RearRight-wheel_text'].geometry} position={nodes['RearRight-wheel_text'].position} rotation={nodes['RearRight-wheel_text'].rotation} material={materials['Material.005']}/>
+            </group>
+                </group>
             <group>
                 {/* chassis */}
-                <RigidBody ref={chassisRef} collider='cuboid' mass={1}>
-                    <mesh castShadow receiveShadow>
-                        <boxGeometry args={[3.5, 0.5, 1.5]}  />
-                        <meshStandardMaterial color='red' />
-                    </mesh>
-                </RigidBody>
+                {/* <RigidBody ref={chassisRef} collider='cuboid' mass={1}> */}
+                    {/* <mesh castShadow receiveShadow geometry={nodes.BodyFrame.geometry} scale={[0.5, 0.5, 0.5]}> */}
+                        {/* <boxGeometry args={[3.5, 0.5, 1.5]}  /> */}
+                        {/* <meshStandardMaterial color='red' /> */}
+                    {/* </mesh> */}
+                {/* </RigidBody> */}
 
                 {/* wheels */}
                 {wheels.map((wheel, i) => (
@@ -295,7 +427,7 @@ export default function Test()
         <RevoluteJointVehicle /> 
         <RigidBody type='fixed' position-y={-5}>
             <mesh >
-                <meshBasicMaterial color={'grey'} />
+                <meshBasicMaterial color={'grey'} visible={false} />
                 <boxGeometry args={[200, 0.1, 20]} />
             </mesh>
         </RigidBody>    
