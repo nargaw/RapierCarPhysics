@@ -340,9 +340,9 @@ export default function Test()
                         {/* wheel */}
                         <RigidBody ref={wheelRefs.current[i]} position={wheel.wheelPosition} colliders={false}>
                         <group castShadow ref={leftFront} position={nodes.FrontLeft.position} >
-                            {/* {[...Array(nodes.FrontLeft.children.length)].map((value, index) =>
+                            {[...Array(nodes.FrontLeft.children.length)].map((value, index) =>
                                 <mesh castShadow key={index}  geometry={nodes.FrontLeft.children[index].geometry} material={nodes.FrontLeft.children[index].material} rotation={nodes.FrontLeft.children[index].rotation}/>
-                            )} */}
+                            )}
                             <mesh castShadow geometry={nodes['FrontLeft-Wheels'].geometry} position={nodes['FrontLeft-Wheels'].position} rotation={nodes['FrontLeft-Wheels'].rotation} material={materials['Rubber']}/>
 
                             <mesh castShadow geometry={nodes['FrontLeft-Wheels_White'].geometry} position={nodes['FrontLeft-Wheels_White'].position} rotation={nodes['FrontLeft-Wheels_White'].rotation} material={materials['Black Metal.002']} material-color={wheels}/>
@@ -350,14 +350,14 @@ export default function Test()
                             <mesh castShadow geometry={nodes['FrontLeft-wheel_text'].geometry} position={nodes['FrontLeft-wheel_text'].position} rotation={nodes['FrontLeft-wheel_text'].rotation} material={materials['Material.005']}/>
                             
                         </group>
-                            {/* <mesh rotation-x={-Math.PI / 2} castShadow receiveShadow>
+                            <mesh rotation-x={-Math.PI / 2} castShadow receiveShadow>
                                 <cylinderGeometry args={[0.25, 0.25, 0.24, 32]}/>
                                 <meshStandardMaterial color={['orange']} />
                             </mesh>
                             <mesh rotation-x={-Math.PI / 2}>
                                 <cylinderGeometry args={[0.251, 0.251, 0.241, 16]}/>
                                 <meshStandardMaterial color="yellow" wireframe/>
-                            </mesh> */}
+                            </mesh>
                             <CylinderCollider mass={0.5} friction={1.5} args={[0.124, 0.25]} rotation={[-Math.PI/2, 0, 0]}/>
                         </RigidBody>
 
