@@ -1,5 +1,5 @@
 import { Perf } from 'r3f-perf'
-import { RigidBody, useFixedJoint, useRevoluteJoint, CylinderCollider, RapierRigidBody } from '@react-three/rapier'
+import { RigidBody, useFixedJoint, useRevoluteJoint, CylinderCollider, RapierRigidBody, CuboidCollider } from '@react-three/rapier'
 import { useGLTF, useKeyboardControls } from '@react-three/drei'
 import React, { createRef, RefObject, useEffect, useMemo, useRef} from 'react'
 import { useThree, useFrame } from '@react-three/fiber'
@@ -139,28 +139,36 @@ export default function Test()
 
         const wheels = [
             {
-                axlePosition: [-1.2, -0.6, 0.7],
+                // axlePosition: [-1.2, -0.6, 0.7],
+                // wheelPosition: [-1.2, -0.4, 1],
+                axlePosition: [-0.5, -0.6, 0.3],
                 wheelPosition: [-1.2, -0.4, 1],
                 isSteered: true,
                 side: 'left',
                 isDriven: false,
             },
             {
-                axlePosition: [-1.2, -0.6, -0.7],
+                // axlePosition: [-1.2, -0.6, -0.7],
+                // wheelPosition: [-1.2, -0.4, -1],
+                axlePosition: [-0.5, -0.6, -0.3],
                 wheelPosition: [-1.2, -0.4, -1],
                 isSteered: true,
                 side: 'right',
                 isDriven: false,
             },
             {
-                axlePosition: [1.2, -0.6, 0.7],
+                // axlePosition: [1.2, -0.6, 0.7],
+                // wheelPosition: [1.2, -0.4, 1],
+                axlePosition: [0.5, -0.6, 0.3],
                 wheelPosition: [1.2, -0.4, 1],
                 isSteered: false,
                 side: 'left',
                 isDriven: true,
             },
             {
-                axlePosition: [1.2, -0.6, -0.7],
+                // axlePosition: [1.2, -0.6, -0.7],
+                // wheelPosition: [1.2, -0.4, -1],
+                axlePosition: [0.5, -0.6, -0.3],
                 wheelPosition: [1.2, -0.4, -1],
                 isSteered: false,
                 side: 'right',
@@ -202,13 +210,15 @@ export default function Test()
         //     camera.lookAt(currentCameraLookAt.current)
         // }, AFTER_RAPIER_UPDATE)
 
+
         return <>
             <group dispose={null} castShadow ref={ref} scale={[0.25, 0.25, 0.25]} position={[0, -0.5, 0]}>
 
-            <RigidBody ref={chassisRef} collider='cuboid' mass={1}>
-                <group castShadow ref={body}>
+            <RigidBody ref={chassisRef} colliders={false} mass={1}>
+                <CuboidCollider position={[0, 0, 0]} args={[3, .95, 2]} />
+                <group castShadow ref={body} position={[0, -3.25, 0]} rotation={[0, Math.PI * 0.5, 0]}>
                 {/* merge bodyframe doors fender */}
-                <mesh castShadow geometry={nodes.BodyFrame.geometry} position={nodes.BodyFrame.position} rotation={nodes.BodyFrame.rotation} material={materials.BodyFrame} material-color={color}/>
+                <mesh castShadow geometry={nodes.BodyFrame.geometry} position={nodes.BodyFrame.position}  material={materials.BodyFrame} material-color={color}/>
 
                 {/* merge all ammos 0-4 */}
                 <mesh castShadow geometry={nodes.Ammo.geometry} position={nodes.Ammo.position} rotation={nodes.Ammo.rotation} material={materials.Ammo0} material-color={ammo}/>
@@ -283,40 +293,8 @@ export default function Test()
             
             
                     
-            <group castShadow ref={rightFront} position={nodes.FrontRight.position}>
-                {/* {[...Array(nodes.FrontLeft.children.length)].map((value, index) =>
-                    <mesh castShadow key={index}  geometry={nodes.FrontRight.children[index].geometry}  material={nodes.FrontRight.children[index].material} rotation={nodes.FrontRight.children[index].rotation}/>
-                )} */}
-                <mesh castShadow geometry={nodes['FrontRIght-Wheels'].geometry} position={nodes['FrontRIght-Wheels'].position} rotation={nodes['FrontRIght-Wheels'].rotation} material={materials['Rubber']}/>
-
-                <mesh castShadow geometry={nodes['FrontRIght-Wheels_White'].geometry} position={nodes['FrontRIght-Wheels_White'].position} rotation={nodes['FrontRIght-Wheels_White'].rotation} material={materials['Black Metal.002']} material-color={wheels}/>
-
-                <mesh castShadow geometry={nodes['FrontRIght-wheel_text'].geometry} position={nodes['FrontRIght-wheel_text'].position} rotation={nodes['FrontRIght-wheel_text'].rotation} material={materials['Material.005']}/>
+    
             </group>
-
-            <group castShadow ref={leftRear} position={nodes.RearLeft.position} >
-                {/* {[...Array(nodes.FrontLeft.children.length)].map((value, index) =>
-                    <mesh castShadow key={index}  geometry={nodes.RearLeft.children[index].geometry}  material={nodes.RearLeft.children[index].material} rotation={nodes.RearLeft.children[index].rotation}/>
-                )} */}
-                <mesh castShadow geometry={nodes['RearLeft-Wheels'].geometry} position={nodes['RearLeft-Wheels'].position} rotation={nodes['RearLeft-Wheels'].rotation} material={materials['Rubber']}/>
-
-                <mesh castShadow geometry={nodes['RearLeft-Wheels_White'].geometry} position={nodes['RearLeft-Wheels_White'].position} rotation={nodes['RearLeft-Wheels_White'].rotation} material={materials['Black Metal.002']} material-color={wheels}/>
-
-                <mesh castShadow geometry={nodes['RearLeft-wheel_text'].geometry} position={nodes['RearLeft-wheel_text'].position} rotation={nodes['RearLeft-wheel_text'].rotation} material={materials['Material.005']}/>
-
-            </group>
-
-            <group castShadow ref={rightRear} position={nodes.RearRight.position} >
-                {/* {[...Array(nodes.FrontLeft.children.length)].map((value, index) =>
-                    <mesh castShadow key={index}  geometry={nodes.RearRight.children[index].geometry} material={nodes.RearRight.children[index].material} rotation={nodes.RearRight.children[index].rotation}/>
-                )} */}
-                <mesh castShadow geometry={nodes['RearRight-Wheels'].geometry} position={nodes['RearRight-Wheels'].position} rotation={nodes['RearRight-Wheels'].rotation} material={materials['Rubber']}/>
-
-                <mesh castShadow geometry={nodes['RearRight-Wheels_White'].geometry} position={nodes['RearRight-Wheels_White'].position} rotation={nodes['RearRight-Wheels_White'].rotation} material={materials['Black Metal.002']}/>
-
-                <mesh castShadow geometry={nodes['RearRight-wheel_text'].geometry} position={nodes['RearRight-wheel_text'].position} rotation={nodes['RearRight-wheel_text'].rotation} material={materials['Material.005']}/>
-            </group>
-                </group>
             <group>
                 {/* chassis */}
                 {/* <RigidBody ref={chassisRef} collider='cuboid' mass={1}> */}
@@ -339,17 +317,8 @@ export default function Test()
 
                         {/* wheel */}
                         <RigidBody ref={wheelRefs.current[i]} position={wheel.wheelPosition} colliders={false}>
-                        <group castShadow ref={leftFront} position={nodes.FrontLeft.position} >
-                            {[...Array(nodes.FrontLeft.children.length)].map((value, index) =>
-                                <mesh castShadow key={index}  geometry={nodes.FrontLeft.children[index].geometry} material={nodes.FrontLeft.children[index].material} rotation={nodes.FrontLeft.children[index].rotation}/>
-                            )}
-                            <mesh castShadow geometry={nodes['FrontLeft-Wheels'].geometry} position={nodes['FrontLeft-Wheels'].position} rotation={nodes['FrontLeft-Wheels'].rotation} material={materials['Rubber']}/>
-
-                            <mesh castShadow geometry={nodes['FrontLeft-Wheels_White'].geometry} position={nodes['FrontLeft-Wheels_White'].position} rotation={nodes['FrontLeft-Wheels_White'].rotation} material={materials['Black Metal.002']} material-color={wheels}/>
-
-                            <mesh castShadow geometry={nodes['FrontLeft-wheel_text'].geometry} position={nodes['FrontLeft-wheel_text'].position} rotation={nodes['FrontLeft-wheel_text'].rotation} material={materials['Material.005']}/>
-                            
-                        </group>
+                       
+                        
                             <mesh rotation-x={-Math.PI / 2} castShadow receiveShadow>
                                 <cylinderGeometry args={[0.25, 0.25, 0.24, 32]}/>
                                 <meshStandardMaterial color={['orange']} />
@@ -424,7 +393,7 @@ export default function Test()
         <RigidBody type='fixed' position-y={-5}>
             <mesh >
                 <meshBasicMaterial color={'grey'} visible={false} />
-                <boxGeometry args={[200, 0.1, 20]} />
+                <boxGeometry args={[200, 0.1, 200]} />
             </mesh>
         </RigidBody>    
     </>
