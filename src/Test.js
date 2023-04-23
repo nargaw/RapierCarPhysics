@@ -35,8 +35,8 @@ export default function Test()
     const RAPIER_UPDATE_PRIORITY = -50
     const AFTER_RAPIER_UPDATE = RAPIER_UPDATE_PRIORITY - 1
 
-    const AXLE_TO_CHASSIS_JOINT_STIFFNESS = 150000
-    const AXLE_TO_CHASSIS_JOINT_DAMPING = 20
+    const AXLE_TO_CHASSIS_JOINT_STIFFNESS = 300000
+    const AXLE_TO_CHASSIS_JOINT_DAMPING = 2
 
     const DRIVEN_WHEEL_FORCE = 600
     const DRIVEN_WHEEL_DAMPING = 5
@@ -310,7 +310,7 @@ export default function Test()
                         {/* axle */}
                         <RigidBody ref={axleRefs.current[i]} position={wheel.axlePosition} colliders='cuboid'>
                             <mesh rotation={[Math.PI/2, 0, 0]} castShadow receiveShadow>
-                                <boxGeometry args={[0.3, 0.3, 0.3]} />
+                                <boxGeometry args={[0.25, 0.25, 0.25]} />
                                 <meshStandardMaterial color='green' />
                             </mesh>
                         </RigidBody>
@@ -320,14 +320,14 @@ export default function Test()
                        
                         
                             <mesh rotation-x={-Math.PI / 2} castShadow receiveShadow>
-                                <cylinderGeometry args={[0.25, 0.25, 0.24, 32]}/>
+                                <cylinderGeometry args={[0.2, 0.2, 0.2, 32]}/>
                                 <meshStandardMaterial color={['orange']} />
                             </mesh>
                             <mesh rotation-x={-Math.PI / 2}>
-                                <cylinderGeometry args={[0.251, 0.251, 0.241, 16]}/>
+                                <cylinderGeometry args={[0.2, 0.2, 0.201, 16]}/>
                                 <meshStandardMaterial color="yellow" wireframe/>
                             </mesh>
-                            <CylinderCollider mass={0.5} friction={1.5} args={[0.124, 0.25]} rotation={[-Math.PI/2, 0, 0]}/>
+                            <CylinderCollider mass={0.5} friction={1.5} args={[0.1, 0.2]} rotation={[-Math.PI/2, 0, 0]}/>
                         </RigidBody>
 
                         {/* connect axle to chassis */}
