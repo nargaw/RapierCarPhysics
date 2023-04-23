@@ -35,7 +35,7 @@ export default function Test()
     const RAPIER_UPDATE_PRIORITY = -50
     const AFTER_RAPIER_UPDATE = RAPIER_UPDATE_PRIORITY - 1
 
-    const AXLE_TO_CHASSIS_JOINT_STIFFNESS = 300000
+    const AXLE_TO_CHASSIS_JOINT_STIFFNESS = 30000
     const AXLE_TO_CHASSIS_JOINT_DAMPING = 2
 
     const DRIVEN_WHEEL_FORCE = 600
@@ -141,8 +141,8 @@ export default function Test()
             {
                 // axlePosition: [-1.2, -0.6, 0.7],
                 // wheelPosition: [-1.2, -0.4, 1],
-                axlePosition: [-0.5, -0.6, 0.3],
-                wheelPosition: [-1.2, -0.4, 1],
+                axlePosition: [-0.52, -0.6, 0.1],
+                wheelPosition: [-1.0, -0.4, 1],
                 isSteered: true,
                 side: 'left',
                 isDriven: false,
@@ -150,8 +150,8 @@ export default function Test()
             {
                 // axlePosition: [-1.2, -0.6, -0.7],
                 // wheelPosition: [-1.2, -0.4, -1],
-                axlePosition: [-0.5, -0.6, -0.3],
-                wheelPosition: [-1.2, -0.4, -1],
+                axlePosition: [-0.52, -0.6, -0.075],
+                wheelPosition: [-1.0, -0.4, -1],
                 isSteered: true,
                 side: 'right',
                 isDriven: false,
@@ -159,8 +159,8 @@ export default function Test()
             {
                 // axlePosition: [1.2, -0.6, 0.7],
                 // wheelPosition: [1.2, -0.4, 1],
-                axlePosition: [0.5, -0.6, 0.3],
-                wheelPosition: [1.2, -0.4, 1],
+                axlePosition: [0.52, -0.6, 0.1],
+                wheelPosition: [1.0, -0.4, 1],
                 isSteered: false,
                 side: 'left',
                 isDriven: true,
@@ -168,8 +168,8 @@ export default function Test()
             {
                 // axlePosition: [1.2, -0.6, -0.7],
                 // wheelPosition: [1.2, -0.4, -1],
-                axlePosition: [0.5, -0.6, -0.3],
-                wheelPosition: [1.2, -0.4, -1],
+                axlePosition: [0.52, -0.6, -0.075],
+                wheelPosition: [1.0, -0.4, -1],
                 isSteered: false,
                 side: 'right',
                 isDriven: true,
@@ -309,7 +309,7 @@ export default function Test()
                     <React.Fragment key={i}>
                         {/* axle */}
                         <RigidBody ref={axleRefs.current[i]} position={wheel.axlePosition} colliders='cuboid'>
-                            <mesh rotation={[Math.PI/2, 0, 0]} castShadow receiveShadow>
+                            <mesh rotation={[Math.PI/2, 0, 0]} castShadow receiveShadow position={[0, 0, wheel.side === 'left' ? 0.125 : -0.125,]}>
                                 <boxGeometry args={[0.25, 0.25, 0.25]} />
                                 <meshStandardMaterial color='green' />
                             </mesh>
